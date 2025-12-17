@@ -1,76 +1,137 @@
 <template>
   <view class="container">
-    <!-- User Header -->
-    <view class="profile-header">
-      <view class="avatar-box">
-        <image class="avatar-img" :src="userInfo.avatar || '/static/logo.png'" mode="aspectFill" v-if="userInfo.avatar" />
-        <text class="avatar-placeholder" v-else>👤</text>
+    <!-- Immersive Background -->
+    <view class="bg-gradient"></view>
+    <view class="bg-shape s1"></view>
+    <view class="bg-shape s2"></view>
+
+    <!-- Header Section -->
+    <view class="profile-card fade-in-up">
+      <view class="header-content">
+        <!-- Avatar -->
+        <view class="avatar-wrapper" @click="changeAvatar">
+          <view class="avatar-border">
+            <image 
+              class="avatar-img" 
+              :src="userInfo.avatar || '/static/logo.png'" 
+              mode="aspectFill" 
+              v-if="userInfo.avatar" 
+            />
+            <view class="avatar-placeholder" v-else>
+              <text>👤</text>
+            </view>
+          </view>
+          <view class="edit-badge">
+            <text class="icon">📷</text>
+          </view>
+        </view>
+
+        <!-- User Info -->
+        <view class="info-wrapper" @click="changeNickname">
+          <view class="name-row">
+            <text class="username">{{ userInfo.nickname || '未登录用户' }}</text>
+            <view class="edit-btn">
+              <text class="icon">✎</text>
+            </view>
+          </view>
+          <view class="level-tag">
+            <text class="crown">👑</text>
+            <text class="level-text">Lv.{{ levelInfo.level }} {{ levelInfo.title }}</text>
+          </view>
+        </view>
+
+        <!-- Check-in Button -->
+        <view 
+          class="checkin-btn" 
+          :class="{ disabled: hasCheckedIn }" 
+          @click="handleCheckIn"
+        >
+          <text class="icon">{{ hasCheckedIn ? '✓' : '📅' }}</text>
+          <text>{{ hasCheckedIn ? '已打卡' : '签到' }}</text>
+        </view>
       </view>
-      <view class="user-info">
-        <text class="username">{{ userInfo.nickname || '未登录用户' }}</text>
-        <text class="level">Lv.{{ levelInfo.level }} {{ levelInfo.title }}</text>
-      </view>
-      <view class="checkin-btn" :class="{ disabled: hasCheckedIn }" @click="handleCheckIn">
-        {{ hasCheckedIn ? '已打卡' : '打卡' }}
+
+      <!-- Stats Grid -->
+      <view class="stats-grid">
+        <view class="stat-item">
+          <text class="num">{{ stats.days }}</text>
+          <text class="label">累计天数</text>
+        </view>
+        <view class="stat-divider"></view>
+        <view class="stat-item">
+          <text class="num">{{ stats.articles }}</text>
+          <text class="label">阅读篇数</text>
+        </view>
+        <view class="stat-divider"></view>
+        <view class="stat-item">
+          <text class="num">{{ stats.quizScore }}</text>
+          <text class="label">演练积分</text>
+        </view>
       </view>
     </view>
 
-    <!-- Stats Row -->
-    <view class="stats-row">
-      <view class="stat-item">
-        <text class="num">{{ stats.days }}</text>
-        <text class="label">累计打卡</text>
+    <!-- Knowledge Graph -->
+    <view class="section-card fade-in-up delay-1">
+      <view class="card-header">
+        <view class="title-box">
+          <text class="icon">📊</text>
+          <text class="title">知识图谱</text>
+        </view>
+        <text class="subtitle">学习进度概览</text>
       </view>
-      <view class="stat-item">
-        <text class="num">{{ stats.articles }}</text>
-        <text class="label">阅读文章</text>
-      </view>
-      <view class="stat-item">
-        <text class="num">{{ stats.quizScore }}</text>
-        <text class="label">演练积分</text>
-      </view>
-    </view>
-
-    <!-- Knowledge Graph (Skills) -->
-    <view class="section-card">
-      <view class="title-row">
-        <text class="title">我的知识图谱</text>
-        <text class="more">查看详情 ></text>
-      </view>
+      
       <view class="skills-list">
         <view class="skill-item" v-for="(val, idx) in skills" :key="idx">
-          <view class="skill-label">
-            <text>{{ val.name }}</text>
-            <text class="percent">{{ val.score }}%</text>
+          <view class="skill-info">
+            <text class="name">{{ val.name }}</text>
+            <text class="score">{{ val.score }}%</text>
           </view>
-          <view class="progress-bg">
-            <view class="progress-bar" :style="{ width: val.score + '%' }"></view>
+          <view class="progress-track">
+            <view 
+              class="progress-fill" 
+              :style="{ '--final-width': val.score + '%', animationDelay: (idx * 0.1) + 's' }"
+            ></view>
           </view>
         </view>
       </view>
     </view>
 
-    <!-- History List -->
-    <view class="section-card">
-      <view class="title-row">
-        <text class="title">最近足迹</text>
-        <view class="clear-btn" @click="clearHistory">清空</view>
+    <!-- Recent History -->
+    <view class="section-card fade-in-up delay-2">
+      <view class="card-header">
+        <view class="title-box">
+          <text class="icon">👣</text>
+          <text class="title">最近足迹</text>
+        </view>
+        <view class="action-btn" @click="clearHistory">
+          <text>清空</text>
+        </view>
       </view>
+
       <view class="history-list" v-if="history.length > 0">
         <view class="history-item" v-for="(item, index) in history" :key="index">
-          <text class="icon">{{ item.icon }}</text>
-          <view class="info">
-            <text class="main">{{ item.main }}</text>
-            <text class="time">{{ item.time }}</text>
+          <view class="item-icon-box" :class="item.icon === '🎮' ? 'game' : 'read'">
+            <text>{{ item.icon }}</text>
+          </view>
+          <view class="item-content">
+            <text class="main-text">{{ item.main }}</text>
+            <text class="time-text">{{ item.time }}</text>
           </view>
         </view>
       </view>
+      
       <view class="empty-state" v-else>
-        <text>暂无足迹，快去学习吧~</text>
+        <image class="empty-img" src="/static/empty-box.png" mode="widthFix" v-if="false"/> 
+        <text class="empty-text">虽然还没有足迹，但未来可期 🌱</text>
       </view>
     </view>
+
+    <!-- Logout -->
+    <view class="logout-btn fade-in-up delay-3" @click="handleLogout">
+      <text>退出登录</text>
+    </view>
     
-    <view class="logout-btn" @click="handleLogout">退出登录</view>
+    <view class="copyright">Intelligent Contract Cloud © 2025</view>
   </view>
 </template>
 
@@ -92,7 +153,8 @@ const initData = () => {
         { name: "房屋租赁", score: 40 },
         { name: "劳动权益", score: 30 },
         { name: "借贷风险", score: 20 },
-        { name: "消费维权", score: 50 }
+        { name: "消费维权", score: 50 },
+        { name: "合同规范", score: 10 }
     ]
     
     // Check local storage for skills
@@ -127,7 +189,6 @@ onShow(() => {
     if (user) {
         userInfo.value = user
     } else {
-        // Redirect if no user? Or just show guest. For now show guest.
         userInfo.value = { nickname: '游客', avatar: '' }
     }
     initData()
@@ -160,6 +221,7 @@ const handleCheckIn = () => {
 const clearHistory = () => {
     uni.removeStorageSync('userHistory')
     history.value = []
+    uni.showToast({ title: '足迹已清空', icon: 'none' })
 }
 
 const handleLogout = () => {
@@ -174,174 +236,412 @@ const handleLogout = () => {
         }
     })
 }
+
+const changeAvatar = () => {
+    uni.chooseImage({
+        count: 1,
+        success: (res) => {
+            const tempFilePath = res.tempFilePaths[0]
+            userInfo.value.avatar = tempFilePath
+            uni.setStorageSync('currentUser', userInfo.value)
+        }
+    })
+}
+
+const changeNickname = () => {
+    uni.showModal({
+        title: '修改昵称',
+        editable: true,
+        placeholderText: '请输入新昵称',
+        content: userInfo.value.nickname,
+        success: (res) => {
+            if (res.confirm && res.content.trim()) {
+                userInfo.value.nickname = res.content.trim()
+                uni.setStorageSync('currentUser', userInfo.value)
+                uni.showToast({ title: '修改成功', icon: 'success' })
+            }
+        }
+    })
+}
 </script>
 
 <style lang="scss" scoped>
 .container {
   min-height: 100vh;
   background: #f8fafc;
-  padding-bottom: 40rpx;
+  padding: 30rpx;
+  padding-bottom: 60rpx;
+  position: relative;
+  overflow: hidden;
 }
 
-.profile-header {
-  background: white;
-  padding: 60rpx 40rpx 40rpx;
-  display: flex;
-  align-items: center;
+/* Dynamic Background */
+.bg-gradient {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 500rpx;
+  background: linear-gradient(135deg, #e0e7ff 0%, #f0f9ff 100%);
+  z-index: 0;
+  border-bottom-left-radius: 60rpx;
+  border-bottom-right-radius: 60rpx;
+}
+
+.bg-shape {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  z-index: 0;
+  opacity: 0.5;
+}
+
+.s1 {
+  width: 300rpx;
+  height: 300rpx;
+  background: #bfdbfe;
+  top: -50rpx;
+  right: -50rpx;
+}
+
+.s2 {
+  width: 200rpx;
+  height: 200rpx;
+  background: #e9d5ff;
+  top: 100rpx;
+  left: -50rpx;
+}
+
+/* Animations */
+.fade-in-up {
+  animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.2s; }
+.delay-3 { animation-delay: 0.3s; }
+
+@keyframes fadeInUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Profile Card */
+.profile-card {
   position: relative;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  border-radius: 40rpx;
+  padding: 40rpx;
+  box-shadow: 
+    0 10rpx 30rpx rgba(148, 163, 184, 0.1),
+    0 4rpx 10rpx rgba(148, 163, 184, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  margin-bottom: 30rpx;
+  margin-top: 20rpx;
   
-  .avatar-box {
-    width: 120rpx;
-    height: 120rpx;
-    background: #e0e7ff;
-    border-radius: 60rpx;
+  .header-content {
+    display: flex;
+    align-items: center;
+    margin-bottom: 50rpx;
+  }
+}
+
+.avatar-wrapper {
+  position: relative;
+  margin-right: 30rpx;
+  
+  .avatar-border {
+    width: 140rpx;
+    height: 140rpx;
+    border-radius: 50%;
+    padding: 6rpx;
+    background: linear-gradient(135deg, #3b82f6, #818cf8);
+    box-shadow: 0 8rpx 20rpx rgba(59, 130, 246, 0.3);
+  }
+  
+  .avatar-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 4rpx solid white;
+    background: white;
+  }
+  
+  .avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: #f1f5f9;
+    border: 4rpx solid white;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-right: 30rpx;
-    border: 4rpx solid white;
-    box-shadow: 0 4rpx 10rpx rgba(0,0,0,0.1);
+    font-size: 60rpx;
+  }
+  
+  .edit-badge {
+    position: absolute;
+    bottom: 6rpx;
+    right: 6rpx;
+    width: 44rpx;
+    height: 44rpx;
+    background: #0f172a;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3rpx solid white;
+    box-shadow: 0 4rpx 8rpx rgba(0,0,0,0.1);
     
-    .avatar-placeholder {
-      font-size: 60rpx;
+    .icon {
+      font-size: 22rpx;
+      margin-bottom: 2rpx;
     }
-  }
-  
-  .user-info {
-    flex: 1;
-    .username {
-      font-size: 36rpx;
-      font-weight: bold;
-      color: #1e3a8a; // Primary Blue
-      display: block;
-    }
-    .level {
-      font-size: 24rpx;
-      color: white;
-      background: #3b82f6;
-      padding: 4rpx 16rpx;
-      border-radius: 20rpx;
-      display: inline-block;
-      margin-top: 10rpx;
-    }
-  }
-  
-  .settings-icon {
-    font-size: 40rpx;
-    color: #94a3b8;
   }
 }
 
-.stats-row {
-  display: flex;
-  justify-content: space-around;
+.info-wrapper {
+  flex: 1;
+  
+  .name-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12rpx;
+    
+    .username {
+      font-size: 40rpx;
+      font-weight: 900;
+      color: #1e3a8a;
+      margin-right: 16rpx;
+    }
+    
+    .edit-btn {
+      width: 40rpx;
+      height: 40rpx;
+      background: #eff6ff;
+      border-radius: 20rpx;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      
+      .icon {
+        font-size: 20rpx;
+        color: #3b82f6;
+      }
+    }
+  }
+  
+  .level-tag {
+    display: inline-flex;
+    align-items: center;
+    background: linear-gradient(90deg, #f59e0b, #d97706);
+    padding: 6rpx 20rpx;
+    border-radius: 30rpx;
+    box-shadow: 0 4rpx 10rpx rgba(245, 158, 11, 0.2);
+    
+    .crown {
+      font-size: 20rpx;
+      margin-right: 8rpx;
+    }
+    
+    .level-text {
+      font-size: 22rpx;
+      font-weight: bold;
+      color: white;
+      text-transform: uppercase;
+      letter-spacing: 1rpx;
+    }
+  }
+}
+
+.checkin-btn {
   background: white;
-  padding-bottom: 40rpx;
-  border-bottom-left-radius: 30rpx;
-  border-bottom-right-radius: 30rpx;
-  margin-bottom: 30rpx;
-  box-shadow: 0 4rpx 10rpx rgba(0,0,0,0.02);
+  border: 1px solid #e2e8f0;
+  padding: 12rpx 28rpx;
+  border-radius: 40rpx;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  font-size: 24rpx;
+  font-weight: bold;
+  color: #3b82f6;
+  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.02);
+  transition: all 0.3s;
+  
+  .icon {
+    font-size: 28rpx;
+  }
+  
+  &:active {
+    transform: scale(0.96);
+    background: #f8fafc;
+  }
+  
+  &.disabled {
+    background: #f1f5f9;
+    color: #94a3b8;
+    border-color: transparent;
+  }
+}
+
+.stats-grid {
+  display: flex;
+  align-items: center;
+  background: #f8fafc;
+  border-radius: 24rpx;
+  padding: 30rpx;
   
   .stat-item {
+    flex: 1;
     text-align: center;
+    
     .num {
       display: block;
       font-size: 36rpx;
-      font-weight: 800;
-      color: #1f2937;
+      font-weight: 900;
+      color: #0f172a;
+      margin-bottom: 6rpx;
     }
+    
     .label {
-      font-size: 24rpx;
-      color: #9ca3af;
-      margin-top: 6rpx;
+      font-size: 22rpx;
+      color: #64748b;
     }
+  }
+  
+  .stat-divider {
+    width: 2rpx;
+    height: 40rpx;
+    background: #e2e8f0;
   }
 }
 
+/* Section Cards */
 .section-card {
   background: white;
-  margin: 0 30rpx 30rpx;
-  border-radius: 24rpx;
-  padding: 30rpx;
-  box-shadow: 0 2rpx 6rpx rgba(0,0,0,0.02);
+  border-radius: 32rpx;
+  padding: 40rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 4rpx 20rpx rgba(148, 163, 184, 0.05);
   
-  .title-row {
+  .card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 30rpx;
+    margin-bottom: 40rpx;
     
-    .title {
-      font-size: 30rpx;
-      font-weight: bold;
-      color: #1f2937;
+    .title-box {
+      display: flex;
+      align-items: center;
+      gap: 16rpx;
+      
+      .icon { font-size: 36rpx; }
+      
+      .title {
+        font-size: 32rpx;
+        font-weight: 800;
+        color: #0f172a;
+      }
     }
-    .more {
+    
+    .subtitle {
       font-size: 24rpx;
-      color: #9ca3af;
+      color: #94a3b8;
+    }
+    
+    .action-btn {
+      font-size: 24rpx;
+      color: #64748b;
+      background: #f1f5f9;
+      padding: 8rpx 20rpx;
+      border-radius: 20rpx;
     }
   }
 }
 
+/* Skills List */
 .skills-list {
   .skill-item {
-    margin-bottom: 24rpx;
+    margin-bottom: 36rpx;
     
-    .skill-label {
+    &:last-child { margin-bottom: 0; }
+    
+    .skill-info {
       display: flex;
       justify-content: space-between;
+      margin-bottom: 12rpx;
       font-size: 26rpx;
-      color: #4b5563;
-      margin-bottom: 8rpx;
+      font-weight: bold;
+      color: #475569;
+      
+      .score { color: #3b82f6; }
     }
     
-    .progress-bg {
-      height: 12rpx;
+    .progress-track {
+      height: 16rpx;
       background: #f1f5f9;
-      border-radius: 6rpx;
+      border-radius: 10rpx;
       overflow: hidden;
       
-      .progress-bar {
+      .progress-fill {
         height: 100%;
         background: linear-gradient(90deg, #3b82f6, #60a5fa);
-        border-radius: 6rpx;
+        border-radius: 10rpx;
+        width: 0;
+        animation: progressSlide 1s ease-out forwards;
       }
     }
   }
 }
 
+@keyframes progressSlide {
+  to { width: var(--final-width); } 
+}
+
+/* History List */
 .history-list {
   .history-item {
     display: flex;
     align-items: center;
-    padding: 20rpx 0;
-    border-bottom: 1rpx solid #f8fafc;
+    margin-bottom: 30rpx;
     
-    &:last-child {
-      border-bottom: none;
-    }
+    &:last-child { margin-bottom: 0; }
     
-
-    .icon {
-      font-size: 32rpx;
-      margin-right: 20rpx;
-      width: 60rpx;
-      height: 60rpx;
-      background: #eff6ff;
-      border-radius: 30rpx;
+    .item-icon-box {
+      width: 80rpx;
+      height: 80rpx;
+      border-radius: 24rpx;
       display: flex;
       align-items: center;
       justify-content: center;
+      font-size: 32rpx;
+      margin-right: 24rpx;
+      
+      &.read {
+        background: #eff6ff;
+        color: #3b82f6;
+      }
+      &.game {
+        background: #fff7ed;
+        color: #f97316;
+      }
     }
     
-    .info {
+    .item-content {
       flex: 1;
-      .main {
-        font-size: 28rpx;
-        color: #334155;
+      
+      .main-text {
         display: block;
+        font-size: 28rpx;
+        font-weight: 600;
+        color: #334155;
+        margin-bottom: 6rpx;
       }
-      .time {
+      
+      .time-text {
         font-size: 22rpx;
         color: #94a3b8;
       }
@@ -349,60 +649,37 @@ const handleLogout = () => {
   }
 }
 
-.checkin-btn {
-  background: linear-gradient(90deg, #3b82f6, #2563eb);
-  color: white;
-  padding: 10rpx 24rpx;
-  border-radius: 30rpx;
-  font-size: 24rpx;
-  font-weight: bold;
-  box-shadow: 0 4rpx 10rpx rgba(37, 99, 235, 0.3);
-  margin-left: 20rpx;
-  transition: all 0.3s;
-  
-  &.disabled {
-    background: #e2e8f0;
-    color: #94a3b8;
-    box-shadow: none;
-  }
-  
-  &:active {
-    transform: scale(0.95);
-  }
-}
-
-.clear-btn {
-  font-size: 24rpx;
-  color: #94a3b8;
-  padding: 4rpx 12rpx;
-  background: #f1f5f9;
-  border-radius: 8rpx;
-  
-  &:active {
-    opacity: 0.7;
-  }
-}
-
 .empty-state {
   text-align: center;
   padding: 40rpx 0;
-  color: #cbd5e1;
-  font-size: 26rpx;
+  
+  .empty-text {
+    font-size: 26rpx;
+    color: #cbd5e1;
+  }
 }
 
 .logout-btn {
-  margin: 60rpx 40rpx;
   background: white;
   color: #ef4444;
   text-align: center;
-  padding: 24rpx;
-  border-radius: 50rpx;
-  font-size: 28rpx;
+  padding: 30rpx;
+  border-radius: 24rpx;
+  font-size: 30rpx;
   font-weight: bold;
-  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.05);
+  box-shadow: 0 4rpx 20rpx rgba(0,0,0,0.03);
+  margin-bottom: 40rpx;
   
   &:active {
     background: #fef2f2;
+    transform: scale(0.98);
   }
+}
+
+.copyright {
+  text-align: center;
+  font-size: 20rpx;
+  color: #cbd5e1;
+  margin-bottom: 20rpx;
 }
 </style>
