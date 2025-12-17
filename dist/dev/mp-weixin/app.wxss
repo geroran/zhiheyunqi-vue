@@ -1,0 +1,32 @@
+/**
+ * uni-app global variable file
+ */
+/* Colors */
+/* Global styles */
+/**
+ * uni-app global variable file
+ */
+/* Colors */
+body {
+  background-color: #f5f7fa;
+  font-family: "PingFang SC", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+view, text, image, scroll-view {
+  box-sizing: border-box;
+}
+/* Custom Utilities */
+.card {
+  background: white;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+.btn-primary {
+  background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+  color: white;
+  border-radius: 50rpx;
+  padding: 20rpx 0;
+  text-align: center;
+  font-weight: bold;
+}page{--status-bar-height:25px;--top-window-height:0px;--window-top:0px;--window-bottom:0px;--window-left:0px;--window-right:0px;--window-magin:0px}[data-c-h="true"]{display: none !important;}

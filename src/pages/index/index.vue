@@ -28,7 +28,7 @@
         <text class="text">合同百科</text>
       </view>
       <view class="card-list">
-        <view class="article-card" v-for="item in articles" :key="item.id">
+        <view class="article-card" v-for="item in articles" :key="item.id" @click="goToDetail('article', item)">
           <view class="card-content">
             <text class="card-title">{{ item.title }}</text>
             <text class="card-desc">{{ item.desc }}</text>
@@ -36,6 +36,7 @@
               <text class="tag" v-for="tag in item.tags" :key="tag">{{ tag }}</text>
             </view>
           </view>
+          <view class="arrow-icon">›</view>
         </view>
       </view>
     </view>
@@ -47,7 +48,7 @@
         <text class="text">热门模板</text>
       </view>
       <scroll-view scroll-x="true" class="template-scroll">
-        <view class="template-card" v-for="tpl in templatesData" :key="tpl.id">
+        <view class="template-card" v-for="tpl in templatesData" :key="tpl.id" @click="goToDetail('template', tpl)">
           <view class="tpl-icon">📄</view>
           <text class="tpl-title">{{ tpl.title }}</text>
           <text class="tpl-desc">{{ tpl.desc }}</text>
@@ -70,6 +71,12 @@ const categories = [
   { name: '模板', icon: '📝', color: '#dcfce7' },
   { name: '术语', icon: '🔤', color: '#f3e8ff' }
 ]
+
+const goToDetail = (type, item) => {
+  uni.navigateTo({
+    url: `/pages/detail/detail?type=${type}&id=${item.id}`
+  })
+}
 </script>
 
 <style lang="scss" scoped>
@@ -192,6 +199,20 @@ const categories = [
     padding: 30rpx;
     margin-bottom: 20rpx;
     box-shadow: 0 2rpx 6rpx rgba(0,0,0,0.03);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    
+    &:active {
+      transform: scale(0.98);
+      box-shadow: 0 4rpx 12rpx rgba(37, 99, 235, 0.15);
+    }
+    
+    .card-content {
+      flex: 1;
+    }
     
     .card-title {
       font-size: 30rpx;
@@ -208,6 +229,7 @@ const categories = [
       display: -webkit-box;
       -webkit-box-orient: vertical;
       -webkit-line-clamp: 2;
+      line-clamp: 2;
       overflow: hidden;
     }
     
@@ -224,6 +246,18 @@ const categories = [
         border-radius: 8rpx;
       }
     }
+    
+    .arrow-icon {
+      font-size: 48rpx;
+      color: #d1d5db;
+      margin-left: 20rpx;
+      transition: all 0.3s ease;
+    }
+    
+    &:active .arrow-icon {
+      color: #2563eb;
+      transform: translateX(8rpx);
+    }
   }
 }
 
@@ -233,12 +267,19 @@ const categories = [
   .template-card {
     display: inline-block;
     width: 300rpx;
-    background: white; // Gradient provided in item style if needed, but white clean card is better
     background: linear-gradient(145deg, #ffffff 0%, #f9fafb 100%);
     border-radius: 20rpx;
     padding: 30rpx;
     margin-right: 20rpx;
     border: 1rpx solid #e5e7eb;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    
+    &:active {
+      transform: translateY(-4rpx);
+      box-shadow: 0 8rpx 20rpx rgba(37, 99, 235, 0.15);
+      border-color: #3b82f6;
+    }
     
     .tpl-icon {
       font-size: 48rpx;
