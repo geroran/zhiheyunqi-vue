@@ -153,6 +153,50 @@ onLoad((options) => {
   
   const dataSource = type === 'article' ? encyclopedia : templates
   currentItem.value = dataSource.find(item => item.id === parseInt(id))
+  
+  // Track History & Stats
+  if (currentItem.value) {
+      // 1. Update History
+      let history = uni.getStorageSync('userHistory') || []
+      const newEntry = {
+          icon: type === 'article' ? '📖' : '📋',
+          main: `学习了《${currentItem.value.title}》`,
+          time: '刚刚'
+      }
+      // Add to front, limit to 20 items
+      history.unshift(newEntry)
+      if (history.length > 20) history.pop()
+      uni.setStorageSync('userHistory', history)
+      
+      // 2. Update Stats (only for articles for now, based on original mock logic)
+      if (type === 'article') {
+          let stats = uni.getStorageSync('userStats') || { days: 1, articles: 0, quizScore: 0 }
+          stats.articles++
+          uni.setStorageSync('userStats', stats)
+          
+          // 3. Update Knowledge Graph Skills
+          let skills = uni.getStorageSync('userSkills')
+          if (skills) {
+              const title = currentItem.value.title
+              const tags = currentItem.value.tags || []
+              let targetCategory = ''
+              
+              // Map content to skill category
+              if (title.includes('租') || tags.includes('租房')) targetCategory = '房屋租赁'
+              else if (title.includes('劳动') || title.includes('离职') || tags.includes('职场')) targetCategory = '劳动权益'
+              else if (title.includes('借') || title.includes('贷') || tags.includes('金融')) targetCategory = '借贷风险'
+              else if (title.includes('消费') || title.includes('买') || tags.includes('维权')) targetCategory = '消费维权'
+              else targetCategory = '基础概念'
+              
+              // Boost specific skill
+              const skillIdx = skills.findIndex(s => s.name === targetCategory)
+              if (skillIdx !== -1 && skills[skillIdx].score < 100) {
+                  skills[skillIdx].score = Math.min(100, skills[skillIdx].score + 5)
+                  uni.setStorageSync('userSkills', skills)
+              }
+          }
+      }
+  }
 })
 
 const goBack = () => {

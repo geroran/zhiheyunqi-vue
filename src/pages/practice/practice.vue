@@ -122,6 +122,46 @@ const selectOption = (idx) => {
   if (hasAnswered.value) return
   selectedOption.value = idx
   hasAnswered.value = true
+  
+  // Logic to update local storage if correct
+  if (activeScenario.value.options[idx].isCorrect) {
+      // 1. Update Score
+      let stats = uni.getStorageSync('userStats') || { days: 1, articles: 0, quizScore: 0 }
+      stats.quizScore += 10
+      uni.setStorageSync('userStats', stats)
+      
+      // 2. Add to History
+      let history = uni.getStorageSync('userHistory') || []
+      const newEntry = {
+          icon: '🎮',
+          main: `完成挑战《${activeScenario.value.title}》`,
+          time: '刚刚'
+      }
+      history.unshift(newEntry)
+      if (history.length > 20) history.pop()
+      uni.setStorageSync('userHistory', history)
+      
+      // 3. Update Skills (Mapped Logic)
+      let skills = uni.getStorageSync('userSkills')
+      if (skills) {
+          const title = activeScenario.value.title
+          const desc = activeScenario.value.desc
+          let targetCategory = ''
+          
+          // Map scenario content to skill category
+          if (title.includes('房') || title.includes('租') || desc.includes('房')) targetCategory = '房屋租赁'
+          else if (title.includes('理财') || title.includes('贷') || title.includes('钱') || desc.includes('金')) targetCategory = '借贷风险'
+          else if (title.includes('职') || title.includes('工') || desc.includes('公司')) targetCategory = '劳动权益'
+          else if (title.includes('买') || title.includes('费') || desc.includes('店')) targetCategory = '消费维权'
+          else targetCategory = '基础概念'
+          
+          const skillIdx = skills.findIndex(s => s.name === targetCategory)
+          if (skillIdx !== -1 && skills[skillIdx].score < 100) {
+             skills[skillIdx].score = Math.min(100, skills[skillIdx].score + 5)
+             uni.setStorageSync('userSkills', skills)
+          }
+      }
+  }
 }
 
 const isCorrect = computed(() => {

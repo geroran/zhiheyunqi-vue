@@ -3,27 +3,30 @@
     <!-- User Header -->
     <view class="profile-header">
       <view class="avatar-box">
-        <text class="avatar-placeholder">👤</text>
+        <image class="avatar-img" :src="userInfo.avatar || '/static/logo.png'" mode="aspectFill" v-if="userInfo.avatar" />
+        <text class="avatar-placeholder" v-else>👤</text>
       </view>
       <view class="user-info">
-        <text class="username">契约新手</text>
-        <text class="level">Lv.2 初入职场</text>
+        <text class="username">{{ userInfo.nickname || '未登录用户' }}</text>
+        <text class="level">Lv.{{ levelInfo.level }} {{ levelInfo.title }}</text>
       </view>
-      <view class="settings-icon">⚙️</view>
+      <view class="checkin-btn" :class="{ disabled: hasCheckedIn }" @click="handleCheckIn">
+        {{ hasCheckedIn ? '已打卡' : '打卡' }}
+      </view>
     </view>
 
     <!-- Stats Row -->
     <view class="stats-row">
       <view class="stat-item">
-        <text class="num">{{ userStats.days }}</text>
+        <text class="num">{{ stats.days }}</text>
         <text class="label">累计打卡</text>
       </view>
       <view class="stat-item">
-        <text class="num">{{ userStats.articles }}</text>
+        <text class="num">{{ stats.articles }}</text>
         <text class="label">阅读文章</text>
       </view>
       <view class="stat-item">
-        <text class="num">{{ userStats.quizScore }}</text>
+        <text class="num">{{ stats.quizScore }}</text>
         <text class="label">演练积分</text>
       </view>
     </view>
@@ -51,45 +54,126 @@
     <view class="section-card">
       <view class="title-row">
         <text class="title">最近足迹</text>
+        <view class="clear-btn" @click="clearHistory">清空</view>
       </view>
-      <view class="history-list">
-        <view class="history-item">
-          <text class="icon">📖</text>
+      <view class="history-list" v-if="history.length > 0">
+        <view class="history-item" v-for="(item, index) in history" :key="index">
+          <text class="icon">{{ item.icon }}</text>
           <view class="info">
-            <text class="main">学习了《违约责任》</text>
-            <text class="time">2小时前</text>
+            <text class="main">{{ item.main }}</text>
+            <text class="time">{{ item.time }}</text>
           </view>
         </view>
-        <view class="history-item">
-          <text class="icon">🔍</text>
-          <view class="info">
-            <text class="main">使用了条款分析器</text>
-            <text class="time">昨天</text>
-          </view>
-        </view>
-        <view class="history-item">
-          <text class="icon">🎮</text>
-          <view class="info">
-            <text class="main">完成挑战《房东突然涨租》</text>
-            <text class="time">3天前</text>
-          </view>
-        </view>
+      </view>
+      <view class="empty-state" v-else>
+        <text>暂无足迹，快去学习吧~</text>
       </view>
     </view>
+    
+    <view class="logout-btn" @click="handleLogout">退出登录</view>
   </view>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { userStats } from '@/mock/index.js'
+import { ref, computed } from 'vue'
+import { onShow } from '@dcloudio/uni-app'
 
-// Transform mock radar data to the format needed for the list
-const skills = ref(userStats.radar.categories.map((cat, index) => {
-  return {
-    name: cat,
-    score: userStats.radar.series[0].data[index]
-  }
-}))
+const userInfo = ref({})
+const stats = ref({ days: 0, articles: 0, quizScore: 0 })
+const skills = ref([])
+const history = ref([])
+const hasCheckedIn = ref(false)
+
+// Init defaults if storage empty
+const initData = () => {
+    // Skills Defaults
+    const defaultSkills = [
+        { name: "基础概念", score: 60 },
+        { name: "房屋租赁", score: 40 },
+        { name: "劳动权益", score: 30 },
+        { name: "借贷风险", score: 20 },
+        { name: "消费维权", score: 50 }
+    ]
+    
+    // Check local storage for skills
+    let storedSkills = uni.getStorageSync('userSkills')
+    if (!storedSkills) {
+        uni.setStorageSync('userSkills', defaultSkills)
+        skills.value = defaultSkills
+    } else {
+        skills.value = storedSkills
+    }
+    
+    // Stats
+    let storedStats = uni.getStorageSync('userStats')
+    if (!storedStats) {
+        storedStats = { days: 1, articles: 0, quizScore: 0 }
+        uni.setStorageSync('userStats', storedStats)
+    }
+    stats.value = storedStats
+    
+    // History
+    let storedHistory = uni.getStorageSync('userHistory')
+    history.value = storedHistory || []
+    
+    // Check-in Status
+    const today = new Date().toLocaleDateString()
+    const lastDate = uni.getStorageSync('lastCheckIn')
+    hasCheckedIn.value = (lastDate === today)
+}
+
+onShow(() => {
+    const user = uni.getStorageSync('currentUser')
+    if (user) {
+        userInfo.value = user
+    } else {
+        // Redirect if no user? Or just show guest. For now show guest.
+        userInfo.value = { nickname: '游客', avatar: '' }
+    }
+    initData()
+})
+
+const levelInfo = computed(() => {
+    const score = stats.value.quizScore
+    if (score < 100) return { level: 1, title: '初入职场' }
+    if (score < 500) return { level: 2, title: '契约新手' }
+    if (score < 1000) return { level: 3, title: '法律达人' }
+    if (score < 2000) return { level: 4, title: '风控专家' }
+    return { level: 5, title: '律政先锋' }
+})
+
+const handleCheckIn = () => {
+    if (hasCheckedIn.value) return
+    
+    const today = new Date().toLocaleDateString()
+    uni.setStorageSync('lastCheckIn', today)
+    hasCheckedIn.value = true
+    
+    // Update Stats
+    stats.value.days++
+    stats.value.quizScore += 5 // Check-in bonus
+    uni.setStorageSync('userStats', stats.value)
+    
+    uni.showToast({ title: '打卡成功 +5积分', icon: 'success' })
+}
+
+const clearHistory = () => {
+    uni.removeStorageSync('userHistory')
+    history.value = []
+}
+
+const handleLogout = () => {
+    uni.showModal({
+        title: '提示',
+        content: '确定要退出登录吗？',
+        success: (res) => {
+            if (res.confirm) {
+                uni.removeStorageSync('currentUser')
+                uni.reLaunch({ url: '/pages/login/login' })
+            }
+        }
+    })
+}
 </script>
 
 <style lang="scss" scoped>
@@ -237,6 +321,7 @@ const skills = ref(userStats.radar.categories.map((cat, index) => {
       border-bottom: none;
     }
     
+
     .icon {
       font-size: 32rpx;
       margin-right: 20rpx;
@@ -261,6 +346,63 @@ const skills = ref(userStats.radar.categories.map((cat, index) => {
         color: #94a3b8;
       }
     }
+  }
+}
+
+.checkin-btn {
+  background: linear-gradient(90deg, #3b82f6, #2563eb);
+  color: white;
+  padding: 10rpx 24rpx;
+  border-radius: 30rpx;
+  font-size: 24rpx;
+  font-weight: bold;
+  box-shadow: 0 4rpx 10rpx rgba(37, 99, 235, 0.3);
+  margin-left: 20rpx;
+  transition: all 0.3s;
+  
+  &.disabled {
+    background: #e2e8f0;
+    color: #94a3b8;
+    box-shadow: none;
+  }
+  
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.clear-btn {
+  font-size: 24rpx;
+  color: #94a3b8;
+  padding: 4rpx 12rpx;
+  background: #f1f5f9;
+  border-radius: 8rpx;
+  
+  &:active {
+    opacity: 0.7;
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40rpx 0;
+  color: #cbd5e1;
+  font-size: 26rpx;
+}
+
+.logout-btn {
+  margin: 60rpx 40rpx;
+  background: white;
+  color: #ef4444;
+  text-align: center;
+  padding: 24rpx;
+  border-radius: 50rpx;
+  font-size: 28rpx;
+  font-weight: bold;
+  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.05);
+  
+  &:active {
+    background: #fef2f2;
   }
 }
 </style>
