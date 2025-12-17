@@ -275,42 +275,6 @@ export const scenarios = [
         ]
     },
     {
-        id: 3,
-        title: "健身房跑路了",
-        desc: "刚办了3000元的年卡，健身房突然关门，老板失联。",
-        options: [
-            { text: "认倒霉，当花钱买教训", isCorrect: false, feedback: "别轻易放弃！这属于商家违约。" },
-            { text: "向消协投诉并报警", isCorrect: true, feedback: "正确！可以拨打12315投诉。虽然诈骗定性难，但如果涉及金额巨大可能涉嫌合同诈骗，报警是必要手段。同时可以准备集体诉讼。" }
-        ]
-    },
-    {
-        id: 4,
-        title: "加班没有加班费",
-        desc: "老板说“公司提倡奉献精神，加班是自愿的”，每晚都要干到9点。",
-        options: [
-            { text: "通过考勤记录主张加班费", isCorrect: true, feedback: "正确！只要单位安排或默认了加班事实，就应支付加班费。保留打卡记录、工作微信记录作为证据。" },
-            { text: "确实是自愿的，不要了", isCorrect: false, feedback: "如果工作量必须加班才能完成，这并非真正的自愿。法律保护劳动者的休息权和报酬权。" }
-        ]
-    },
-    {
-        id: 5,
-        title: "网购标错价，商家砍单",
-        desc: "看到某大牌笔记本电脑只要100元，下单后商家说‘系统故障’要求取消订单。",
-        options: [
-            { text: "商家有权取消，因为是失误", isCorrect: false, feedback: "不一定。如果订单已生成（合同成立），商家单方取消构成违约。" },
-            { text: "坚持要求发货", isCorrect: true, feedback: "正确！在网络购物中，订单提交成功时合同一般即成立。虽然商家可能主张‘重大误解’撤销合同，但必须通过法院或仲裁机构，不能自己说了算。" }
-        ]
-    },
-    {
-        id: 6,
-        title: "借钱给朋友没写借条",
-        desc: "好哥们借了1万块，微信转账的，没写借条，现在联系不上了。",
-        options: [
-            { text: "没借条肯定要不回了", isCorrect: false, feedback: "并非如此。微信转账记录、聊天记录都可以作为证据。" },
-            { text: "收集聊天记录起诉", isCorrect: true, feedback: "正确！微信聊天中关于借款的商议、转账凭证等形成的证据链，可以证明借贷关系存在。尽快向法院起诉。" }
-        ]
-    },
-    {
         id: 7,
         title: "定金能退吗？",
         desc: "看中一套房交了5万定金，后来自己通过其他渠道找到了更便宜的，想不买这套了。",
@@ -326,6 +290,150 @@ export const scenarios = [
         options: [
             { text: "忍了，二手交易风险自担", isCorrect: false, feedback: "卖家隐瞒质量状况属于欺诈。" },
             { text: "申请平台介入仲裁", isCorrect: true, feedback: "正确！‘不退不换’不能免除卖家对商品质量如实描述的义务。若存在欺诈，可以主张退货退款甚至赔偿。" }
+        ]
+    },
+    {
+        id: 9,
+        title: "宠物狗咬伤路人",
+        desc: "带狗出门没牵绳，狗受到惊吓咬伤了路过的小孩。",
+        options: [
+            { text: "我是无心的，道个歉就行", isCorrect: false, feedback: "不够。这是饲养动物损害责任。" },
+            { text: "承担全部赔偿责任", isCorrect: true, feedback: "正确！《民法典》规定，未对动物采取安全措施造成他人损害的，动物饲养人应当承担侵权责任。" }
+        ]
+    },
+    {
+        id: 10,
+        title: "被理发店办卡套路",
+        desc: "理发师一直推销，迷迷糊糊充了5000元，回家后悔了想退钱。",
+        options: [
+            { text: "没消费就能全额退", isCorrect: true, feedback: "正确！根据消费者权益保护法，消费者有权要求退还没有消费的预付款项。虽然商家可能会设置障碍，但法律支持你。" },
+            { text: "只要交了钱就不能退了", isCorrect: false, feedback: "错误。预付式消费在未接受服务前，消费者有权解除合同。" }
+        ]
+    }
+];
+
+export const fillBlankScenarios = [
+    {
+        id: 101,
+        title: "劳动合同期限",
+        desc: "劳动合同期限三个月以上不满一年的，试用期不得超过____。",
+        options: [
+            { text: "一个月", isCorrect: true, feedback: "正确！根据《劳动合同法》第十九条：劳动合同期限三个月以上不满一年的，试用期不得超过一个月。" },
+            { text: "二个月", isCorrect: false, feedback: "错误。劳动合同期限一年以上不满三年的，试用期才不得超过二个月。" },
+            { text: "三个月", isCorrect: false, feedback: "错误。三年以上固定期限和无固定期限的劳动合同，试用期不得超过六个月。" }
+        ]
+    },
+    {
+        id: 102,
+        title: "定金罚则",
+        desc: "收受定金的一方不履行债务的，应当____返还定金。",
+        options: [
+            { text: "原额", isCorrect: false, feedback: "错误。如果只退原额，就没有惩罚意义了。" },
+            { text: "双倍", isCorrect: true, feedback: "正确！《民法典》第五百八十七条规定：收受定金的一方不履行债务或者履行债务不符合约定，致使不能实现合同目的的，应当双倍返还定金。" },
+            { text: "三倍", isCorrect: false, feedback: "错误。三倍赔偿通常适用于欺诈消费者的情形（消费者权益保护法）。" }
+        ]
+    },
+    {
+        id: 103,
+        title: "民间借贷利率",
+        desc: "合同并没有约定利息，出借人主张利息，人民法院____。",
+        options: [
+            { text: "应当支持", isCorrect: false, feedback: "错误。没有约定视为无息。" },
+            { text: "不予支持", isCorrect: true, feedback: "正确！《民法典》第六百八十条第一款规定：禁止高利放贷，借款的利率不得违反国家有关规定。第二款规定：借款合同对支付利息没有约定的，视为没有利息。" },
+            { text: "支持按银行同期利率计算", isCorrect: false, feedback: "错误。只有约定不明时，才可参照当时一年期贷款市场报价利率等因素确定。" }
+        ]
+    },
+    {
+        id: 104,
+        title: "试用期工资",
+        desc: "劳动者在试用期的工资不得低于本单位相同岗位最低档工资或者劳动合同约定工资的____。",
+        options: [
+            { text: "50%", isCorrect: false, feedback: "太低了，违法。" },
+            { text: "80%", isCorrect: true, feedback: "正确！《劳动合同法》第二十条规定：劳动者在试用期的工资不得低于本单位相同岗位最低档工资或者劳动合同约定工资的百分之八十。" },
+            { text: "100%", isCorrect: false, feedback: "法律允许试用期工资略低于转正工资，只要不低于80%且不低于最低工资标准。" }
+        ]
+    },
+    {
+        id: 105,
+        title: "网购后悔权",
+        desc: "经营者采用网络、电视、电话、邮购等方式销售商品，消费者有权自收到商品之日起____日内退货，且无需说明理由。",
+        options: [
+            { text: "三", isCorrect: false, feedback: "时间太短。" },
+            { text: "七", isCorrect: true, feedback: "正确！这就是著名的“七天无理由退货”制度。《消费者权益保护法》第二十五条规定。" },
+            { text: "十五", isCorrect: false, feedback: "一般质量问题换货期可能是15天，但无理由退货是7天。" }
+        ]
+    },
+    {
+        id: 106,
+        title: "离婚冷静期",
+        desc: "自婚姻登记机关收到离婚登记申请之日起____日内，任何一方不愿意离婚的，可以向婚姻登记机关撤回离婚登记申请。",
+        options: [
+            { text: "三十", isCorrect: true, feedback: "正确！《民法典》第一千零七十七条确立了三十日的离婚冷静期制度。" },
+            { text: "六十", isCorrect: false, feedback: "错误。" },
+            { text: "九十", isCorrect: false, feedback: "错误。" }
+        ]
+    }
+];
+
+export const spotDiffScenarios = [
+    {
+        id: 201,
+        title: "租房合同陷阱",
+        desc: "找出以下合同条款中的风险点：\n'租赁期间，房屋及其附属设施由于自然老化产生的维修责任由承租人承担。'",
+        options: [
+            { text: "自然老化", isCorrect: true, feedback: "正确！自然老化或正常使用造成的损坏，原则上应由出租人承担维修责任。该条款强行将房东的维修义务转嫁给了租客，属于霸王条款。" },
+            { text: "附属设施", isCorrect: false, feedback: "这部分表述本身没有问题。" },
+            { text: "承租人", isCorrect: false, feedback: "在这个条款语境下，风险点在于责任分配，而不是主体本身。" }
+        ]
+    },
+    {
+        id: 202,
+        title: "理财合同陷阱",
+        desc: "找出风险点：\n'本理财产品预期年化收益率10%，历史收益仅供参考，投资有风险，本金不保证安全。'",
+        options: [
+            { text: "预期年化收益率10%", isCorrect: false, feedback: "这是产品的收益目标，虽然高但本身不是合同陷阱，关键看是否承诺保本。" },
+            { text: "本金不保证安全", isCorrect: false, feedback: "这反而是合规的风险提示，不是陷阱。" },
+            { text: "本条款相对合规，主要风险在于高收益对应的本身风险", isCorrect: true, feedback: "正确！这是一个相对合规的风险提示条款。找茬的关键在于识别出它其实是在提示风险，而不是在设置陷阱。真正的陷阱通常是'保本保息'等违规承诺。" }
+        ]
+    },
+    {
+        id: 203,
+        title: "离职赔偿陷阱",
+        desc: "找出风险点：\n'员工主动辞职的，应当提前30日书面通知公司，否则需赔偿公司一个月工资作为违约金。'",
+        options: [
+            { text: "提前30日", isCorrect: false, feedback: "这是符合劳动合同法规定的。" },
+            { text: "赔偿一个月工资", isCorrect: true, feedback: "正确！劳动合同法规定，员工违约解除合同给公司造成损失的，才需承担赔偿责任。且公司不能随意设定'违约金'（除非涉及培训服务期或竞业限制）。单纯未提前通知扣一个月工资往往由于缺乏依据而不被支持。" },
+            { text: "书面通知", isCorrect: false, feedback: "书面通知是法定程序。" }
+        ]
+    },
+    {
+        id: 204,
+        title: "装修合同猫腻",
+        desc: "找出风险点：\n'装修过程中，如遇原材料价格上涨，乙方有权根据市场行情调整预算费用，无需甲方同意。'",
+        options: [
+            { text: "原材料价格上涨", isCorrect: false, feedback: "这是一种客观情况。" },
+            { text: "无需甲方同意", isCorrect: true, feedback: "正确！这是典型的霸王条款。预算调整必须经双方协商一致并签署补充协议，单方调整价格严重侵害了消费者的知情权和公平交易权。" },
+            { text: "调整预算", isCorrect: false, feedback: "调整本身是可以的，关键在于是单方还是协商。" }
+        ]
+    },
+    {
+        id: 205,
+        title: "赠品概不负责",
+        desc: "找出风险点：\n'购买家电满5000送高档电饭煲，赠品如出现质量问题，本店概不负责。'",
+        options: [
+            { text: "满5000送", isCorrect: false, feedback: "这是正常的促销手段。" },
+            { text: "概不负责", isCorrect: true, feedback: "正确！《消费者权益保护法》规定，赠品也属于经营者提供的商品，如果赠品有质量问题，经营者也应当承担修理、更换等责任。'概不负责'无效。" },
+            { text: "高档电饭煲", isCorrect: false, feedback: "这是对赠品的描述。" }
+        ]
+    },
+    {
+        id: 206,
+        title: "逾期交房免责",
+        desc: "找出风险点：\n'因不可抗力导致逾期交房的，开发商不承担违约责任。注：不可抗力包括但不限于雨雪天气、市政施工、材料供应中断等。'",
+        options: [
+            { text: "不可抗力", isCorrect: false, feedback: "不可抗力确实可以免责，但关键看如何定义。" },
+            { text: "注：不可抗力包括...", isCorrect: true, feedback: "正确！开发商随意扩大了'不可抗力'的范围。雨雪天气、材料中断通常属于商业风险或可预见情况，不属于法律规定的'不可抗力'。这是为了推卸延期交房责任。" },
+            { text: "开发商", isCorrect: false, feedback: "主体没问题。" }
         ]
     }
 ];

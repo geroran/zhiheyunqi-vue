@@ -9,12 +9,19 @@
     <view class="chat-card">
       <view class="chat-header">
         <view class="icon-box">
-          <text class="icon">💬</text>
+          <text class="icon">{{ currentConfig.icon }}</text>
         </view>
         <view class="chat-info">
-          <text class="name">智能法律顾问</text>
-          <text class="desc">基于 专业法律RAG知识库 大模型 · 支持流式输出</text>
+          <text class="name">{{ currentConfig.title }}</text>
+          <text class="desc">{{ currentConfig.desc }}</text>
         </view>
+        <button 
+          v-if="currentMode !== 'general'" 
+          class="reset-mode-btn" 
+          @click="switchMode('general')"
+        >
+          返回通用
+        </button>
       </view>
 
       <!-- Sample Questions -->
@@ -22,7 +29,7 @@
         <text class="samples-title">💡 快速体验 - 点击示例问题</text>
         <view class="samples-grid">
           <view 
-            v-for="(sample, index) in sampleQuestions" 
+            v-for="(sample, index) in currentConfig.samples" 
             :key="index"
             class="sample-item"
             @click="selectSample(sample)"
@@ -37,7 +44,7 @@
       <view class="input-section">
         <textarea 
           class="question-input" 
-          placeholder="请输入您的法律问题，或点击上方示例快速体验..." 
+          :placeholder="currentConfig.placeholder" 
           v-model="userQuestion"
           maxlength="500"
           :disabled="isStreaming"
@@ -74,15 +81,15 @@
     </view>
 
     <!-- Original Tools Section (Collapsed) -->
-    <view class="other-tools">
-      <text class="section-title">其他工具</text>
+    <view class="other-tools" v-if="currentMode === 'general'">
+      <text class="section-title">其他专业工具</text>
       <view class="grid-tools">
-        <view class="grid-card">
+        <view class="grid-card" @click="switchMode('analysis')">
           <text class="tool-icon">🔍</text>
           <text class="tool-name">条款分析</text>
           <text class="tool-desc">识别风险条款</text>
         </view>
-        <view class="grid-card">
+        <view class="grid-card" @click="switchMode('checklist')">
           <text class="tool-icon">📋</text>
           <text class="tool-name">自查清单</text>
           <text class="tool-desc">签约前核对</text>
@@ -101,34 +108,53 @@ const API_URL = 'https://api.siliconflow.cn/v1/chat/completions'
 const userQuestion = ref('')
 const aiResponse = ref('')
 const isStreaming = ref(false)
+const currentMode = ref('general') // general, analysis, checklist
 
-// 示例问题
-const sampleQuestions = ref([
-  {
-    icon: '📝',
-    question: '租房合同中"最终解释权归房东所有"这个条款有效吗？'
+const modeConfig = {
+  general: {
+    title: '智能法律顾问',
+    desc: '基于 专业法律RAG知识库 大模型 · 支持流式输出',
+    icon: '💬',
+    systemPrompt: '你是一个专业的法律顾问助手，擅长用通俗易懂的语言解答法律问题。回答要准确、专业，并提供实用建议。',
+    placeholder: '请输入您的法律问题，或点击上方示例快速体验...',
+    samples: [
+      { icon: '📝', question: '租房合同中"最终解释权归房东所有"这个条款有效吗？' },
+      { icon: '💼', question: '劳动合同试用期最长可以约定多久？' },
+      { icon: '🏠', question: '购房合同签订后，开发商延期交房怎么办？' },
+      { icon: '🚗', question: '交通事故对方全责但不赔偿，应该如何处理？' },
+      { icon: '💰', question: '网购商品存在质量问题，商家拒绝退款怎么办？' },
+      { icon: '⚖️', question: '什么情况下可以申请劳动仲裁？需要哪些材料？' }
+    ]
   },
-  {
-    icon: '💼',
-    question: '劳动合同试用期最长可以约定多久？'
+  analysis: {
+    title: '条款风险分析师',
+    desc: '粘贴合同条款 · 深度识别陷阱 · 提供修改建议',
+    icon: '🔍',
+    systemPrompt: '你是一个专业的合同条款风险分析师。请对用户提供的合同条款进行深度分析，指出其中的法律风险、不公平条款、模糊表述，并给出具体的修改建议。回答格式应包含：风险等级、风险点解析、修改建议。',
+    placeholder: '请粘贴您需要分析的合同条款...',
+    samples: [
+      { icon: '🏠', question: '分析条款："租赁期间，如房屋发生任何损坏，均由承租人负责维修并承担费用。"' },
+      { icon: '💼', question: '分析条款："员工离职后3年内不得从事同行业工作，否则需赔偿公司50万元。"' },
+      { icon: '💰', question: '分析条款："本充值卡一经售出，概不退换，余额不予退还。"' },
+      { icon: '⚠️', question: '分析条款："出卖人逾期交房超过90天，买受人方可解除合同，且不退还定金。"' }
+    ]
   },
-  {
-    icon: '🏠',
-    question: '购房合同签订后，开发商延期交房怎么办？'
-  },
-  {
-    icon: '🚗',
-    question: '交通事故对方全责但不赔偿，应该如何处理？'
-  },
-  {
-    icon: '💰',
-    question: '网购商品存在质量问题，商家拒绝退款怎么办？'
-  },
-  {
-    icon: '⚖️',
-    question: '什么情况下可以申请劳动仲裁？需要哪些材料？'
+  checklist: {
+    title: '避坑清单生成器',
+    desc: '输入场景 · 生成检查清单 · 签约前逐项核对',
+    icon: '📋',
+    systemPrompt: '你是一个专业的法律风险控制专家。请根据用户提供的场景（如租房、买房、入职等），生成一份详细的“避坑自查清单”。清单应包含：核心通过点、必备材料、常见陷阱、签约前必问事项。请以Markdown列表形式输出。',
+    placeholder: '请输入您要进行的法律行为（如：我要租房）...',
+    samples: [
+      { icon: '🏘️', question: '我要租一间二手房，请生成签约前自查清单' },
+      { icon: '🎓', question: '我是应届生，马上要签三方协议，需要注意什么？' },
+      { icon: '🚗', question: '购买二手车，过户前需要检查哪些手续和合同细节？' },
+      { icon: '🛠️', question: '家里装修找了装修公司，签合同前要核对哪些项目？' }
+    ]
   }
-])
+}
+
+const currentConfig = computed(() => modeConfig[currentMode.value])
 
 // 选择示例问题
 const selectSample = (sample) => {
@@ -138,6 +164,14 @@ const selectSample = (sample) => {
   setTimeout(() => {
     sendQuestion()
   }, 300)
+}
+
+const switchMode = (mode) => {
+  if (isStreaming.value) return
+  currentMode.value = mode
+  clearChat()
+  // 滚动到顶部
+  uni.pageScrollTo({ scrollTop: 0, duration: 300 })
 }
 
 // Markdown 渲染（简化版，处理常见格式）
@@ -209,7 +243,7 @@ const sendQuestion = async () => {
         messages: [
           {
             role: 'system',
-            content: '你是一个专业的法律顾问助手，擅长用通俗易懂的语言解答法律问题。回答要准确、专业，并提供实用建议。'
+            content: currentConfig.value.systemPrompt
           },
           {
             role: 'user',
@@ -646,6 +680,20 @@ const clearChat = () => {
         color: #9ca3af;
       }
     }
+  }
+}
+
+.reset-mode-btn {
+  font-size: 22rpx;
+  color: #4b5563;
+  background: #f1f5f9;
+  border-radius: 30rpx;
+  padding: 8rpx 20rpx;
+  margin-left: auto;
+  border: 1rpx solid #e2e8f0;
+  
+  &:active {
+    background: #e2e8f0;
   }
 }
 

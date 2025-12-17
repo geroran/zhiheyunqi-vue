@@ -7,18 +7,17 @@
     </view>
 
     <!-- Game Modes -->
+    <!-- Game Modes -->
     <view class="mode-scroll">
-      <view class="mode-card active">
-        <text class="emoji">🎭</text>
-        <text class="name">情景模拟</text>
-      </view>
-      <view class="mode-card">
-        <text class="emoji">📝</text>
-        <text class="name">条款填空</text>
-      </view>
-      <view class="mode-card">
-        <text class="emoji">🔎</text>
-        <text class="name">找茬游戏</text>
+      <view 
+        class="mode-card" 
+        v-for="(mode, index) in gameModes" 
+        :key="index"
+        :class="{ active: currentMode === index }"
+        @click="switchMode(index)"
+      >
+        <text class="emoji">{{ mode.icon }}</text>
+        <text class="name">{{ mode.name }}</text>
       </view>
     </view>
 
@@ -26,7 +25,7 @@
     <view class="scenario-list" v-if="!activeScenario">
       <view 
         class="scenario-card" 
-        v-for="item in scenariosData" 
+        v-for="item in currentList" 
         :key="item.id"
         @click="startScenario(item)"
       >
@@ -82,12 +81,36 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { scenarios } from '@/mock/index.js'
+import { scenarios, fillBlankScenarios, spotDiffScenarios } from '@/mock/index.js'
 
-const scenariosData = ref(scenarios)
+const currentMode = ref(0) // 0: 情景模拟, 1: 条款填空, 2: 找茬游戏
 const activeScenario = ref(null)
 const selectedOption = ref(null)
 const hasAnswered = ref(false)
+
+const scenariosData = ref(scenarios)
+const fillBlankData = ref(fillBlankScenarios)
+const spotDiffData = ref(spotDiffScenarios)
+
+const gameModes = [
+  { name: '情景模拟', icon: '🎭' },
+  { name: '条款填空', icon: '📝' },
+  { name: '找茬游戏', icon: '🔎' }
+]
+
+const currentList = computed(() => {
+  switch(currentMode.value) {
+    case 0: return scenariosData.value
+    case 1: return fillBlankData.value
+    case 2: return spotDiffData.value
+    default: return scenariosData.value
+  }
+})
+
+const switchMode = (index) => {
+  currentMode.value = index
+  activeScenario.value = null // 切换模式时退出当前游戏
+}
 
 const startScenario = (item) => {
   activeScenario.value = item
