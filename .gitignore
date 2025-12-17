@@ -1,1 +1,13 @@
-/node_modules
+node_modules/
+.DS_Store
+dist/
+unpackage/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.idea/
+.vscode/
+*.local
+.hbuilderx/
