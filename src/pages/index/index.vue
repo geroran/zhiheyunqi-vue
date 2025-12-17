@@ -34,6 +34,16 @@
       </view>
     </view>
 
+    <!-- Quick Access Feature Card -->
+    <view class="feature-card" @click="goToLawSearch">
+      <view class="feature-icon">⚖️</view>
+      <view class="feature-info">
+        <text class="feature-title">全国法规检索</text>
+        <text class="feature-desc">查询全国人大法规库</text>
+      </view>
+      <view class="feature-arrow">›</view>
+    </view>
+
     <!-- Dynamic List Section -->
     <view class="section">
       <view class="section-title">
@@ -136,6 +146,12 @@ const handleItemClick = (item) => {
 const goToDetail = (type, item) => {
   uni.navigateTo({
     url: `/pages/detail/detail?type=${type}&id=${item.id}`
+  })
+}
+
+const goToLawSearch = () => {
+  uni.navigateTo({
+    url: '/pages/law/law'
   })
 }
 </script>
@@ -274,6 +290,55 @@ const goToDetail = (type, item) => {
       color: #4b5563;
       font-weight: 500;
     }
+  }
+}
+
+.feature-card {
+  margin: 30rpx;
+  background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+  border-radius: 24rpx;
+  padding: 30rpx;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 8rpx 24rpx rgba(30, 58, 138, 0.25);
+  
+  .feature-icon {
+    width: 80rpx;
+    height: 80rpx;
+    background: rgba(255,255,255,0.2);
+    border-radius: 20rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40rpx;
+    margin-right: 24rpx;
+  }
+  
+  .feature-info {
+    flex: 1;
+    
+    .feature-title {
+      display: block;
+      font-size: 32rpx;
+      font-weight: bold;
+      color: white;
+      margin-bottom: 4rpx;
+    }
+    
+    .feature-desc {
+      font-size: 24rpx;
+      color: rgba(255,255,255,0.7);
+    }
+  }
+  
+  .feature-arrow {
+    font-size: 48rpx;
+    color: rgba(255,255,255,0.5);
+  }
+  
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
   }
 }
 

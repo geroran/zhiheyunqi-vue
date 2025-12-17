@@ -36,6 +36,13 @@
             }
         },
         {
+            "path": "pages/law/law",
+            "style": {
+                "navigationStyle": "custom",
+                "enablePullDownRefresh": false
+            }
+        },
+        {
             "path": "pages/profile/profile",
             "style": {
                 "navigationBarTitleText": "我的成长",
