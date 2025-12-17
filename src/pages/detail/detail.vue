@@ -300,7 +300,7 @@ const sendQuestion = async () => {
 
 .header {
   background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
-  padding: 80rpx 30rpx 40rpx;
+  padding: 80rpx 30rpx ;
   position: relative;
   
   .back-btn {
@@ -333,7 +333,7 @@ const sendQuestion = async () => {
       font-size: 22rpx;
       padding: 6rpx 16rpx;
       border-radius: 20rpx;
-      margin-bottom: 16rpx;
+      margin: 36rpx;
       backdrop-filter: blur(10px);
     }
     
