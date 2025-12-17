@@ -6,6 +6,8 @@ export default defineConfig({
     plugins: [
         uni(),
     ],
+    // 部署到子路径 /tem/zhyq-xcx/
+    base: '/tem/zhyq-xcx/',
     server: {
         proxy: {
             '/api/law': {
@@ -29,3 +31,4 @@ export default defineConfig({
         }
     }
 })
+

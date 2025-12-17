@@ -37,7 +37,7 @@
       <!-- Form -->
       <view class="form-group">
         <view class="input-wrap">
-          <text class="input-icon">�</text>
+          <text class="input-icon">☰</text>
           <input 
             class="input" 
             v-model="username" 
@@ -47,7 +47,7 @@
           />
         </view>
         <view class="input-wrap">
-          <text class="input-icon">�</text>
+          <text class="input-icon">◉</text>
           <input 
             class="input" 
             v-model="password" 
@@ -58,7 +58,7 @@
         </view>
         
         <view class="input-wrap slide-in" v-if="!isLoginMode">
-          <text class="input-icon">🛡️</text>
+          <text class="input-icon">✓</text>
           <input 
             class="input" 
             v-model="confirmPassword" 
@@ -81,7 +81,7 @@
 
       <button class="judge-btn" hover-class="btn-hover" @click="quickLogin">
         <view class="btn-content">
-          <text class="icon">👑</text>
+          <text class="icon">★</text>
           <text class="text">评委老师一键体验</text>
         </view>
         <view class="shine-effect"></view>
