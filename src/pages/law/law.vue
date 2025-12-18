@@ -162,6 +162,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { legalService } from '@/utils/legalService.js'
 
 const keyword = ref('')
 const results = ref([])
@@ -180,6 +181,9 @@ const ofdPath = ref('')
 const currentPageIndex = ref(0)
 const hasMorePages = ref(true)
 const ofdError = ref('')
+
+// Constants
+const MAX_PAGES_SAFETY = 50 
 
 const hotKeywords = ['民法典', '合同法', '劳动法', '消费者权益', '婚姻法', '公司法']
 
@@ -204,7 +208,7 @@ const formatDate = (dateStr) => {
   return dateStr.substring(0, 10)
 }
 
-// 清理标题中的HTML标签
+// Clean HTML tags from title
 const cleanTitle = (str) => {
   if (!str) return ''
   return str.replace(/<[^>]*>/g, '')
@@ -213,7 +217,7 @@ const cleanTitle = (str) => {
 const loadDefaultResults = async () => {
   loading.value = true
   try {
-    const res = await fetchLawList('', 1)
+    const res = await legalService.searchList({ page: 1 })
     results.value = res.rows || []
     total.value = res.total || 0
   } catch (e) {
@@ -234,7 +238,10 @@ const doSearch = async () => {
   results.value = []
   
   try {
-    const res = await fetchLawList(keyword.value, pageNum.value)
+    const res = await legalService.searchList({ 
+      keyword: keyword.value, 
+      page: pageNum.value 
+    })
     results.value = res.rows || []
     total.value = res.total || 0
   } catch (e) {
@@ -251,30 +258,16 @@ const loadMore = async () => {
   pageNum.value++
   
   try {
-    const res = await fetchLawList(keyword.value, pageNum.value)
+    const res = await legalService.searchList({ 
+      keyword: keyword.value, 
+      page: pageNum.value 
+    })
     results.value = [...results.value, ...(res.rows || [])]
   } catch (e) {
     console.error('Load more error:', e)
   } finally {
     loadingMore.value = false
   }
-}
-
-const fetchLawList = async (searchContent, page) => {
-  const response = await fetch('/api/law/law-search/search/list', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      searchRange: 1,
-      searchType: 2,
-      searchContent: searchContent,
-      pageNum: page,
-      pageSize: pageSize
-    })
-  })
-  
-  if (!response.ok) throw new Error('API failed')
-  return response.json()
 }
 
 const viewDocument = async (item) => {
@@ -287,56 +280,64 @@ const viewDocument = async (item) => {
   ofdError.value = ''
   
   try {
-    const detailRes = await fetch(`/api/law/law-search/search/flfgDetails?bbbs=${item.bbbs}`)
-    const detailData = await detailRes.json()
+    const detailData = await legalService.getDetail(item.bbbs)
     
-    if (detailData.code === 200 && detailData.data?.ossFile?.ossWordOfdPath) {
-      ofdPath.value = detailData.data.ossFile.ossWordOfdPath
+    if (detailData && detailData.ossFile && detailData.ossFile.ossWordOfdPath) {
+      ofdPath.value = detailData.ossFile.ossWordOfdPath
       await loadOfdPages()
     } else {
       ofdError.value = '该法规暂无电子文档'
     }
   } catch (e) {
     console.error('View error:', e)
-    ofdError.value = '加载失败: ' + e.message
+    // Try to get error message safely
+    const msg = e.message || '加载详情失败'
+    ofdError.value = msg
   } finally {
     loadingPages.value = false
   }
 }
 
+// Optimized loading: fetch image -> base64
 const loadOfdPages = async () => {
   if (!ofdPath.value) return
+  if (!hasMorePages.value) return
   
-  const pagesToLoad = 5
-  const newPages = []
+  const pagesToLoad = 3 // Load 3 pages at a time to be safe and fast enough
+  let loadedCount = 0
   
   for (let i = 0; i < pagesToLoad; i++) {
-    const pageIndex = currentPageIndex.value + i
-    const pageUrl = buildOfdImageUrl(ofdPath.value, pageIndex)
+    // Safety break
+    if (currentPageIndex.value >= MAX_PAGES_SAFETY) {
+      hasMorePages.value = false
+      break
+    }
+
+    const pageUrl = legalService.getOFDPageUrl(ofdPath.value, currentPageIndex.value)
     
     try {
-      const testRes = await fetch(pageUrl, { method: 'HEAD' })
-      if (testRes.ok) {
-        newPages.push(pageUrl)
+      const base64Img = await legalService.fetchImage(pageUrl)
+      
+      if (base64Img) {
+        ofdPages.value.push(base64Img)
+        currentPageIndex.value++
+        loadedCount++
       } else {
+        // Null means end of doc or error
         hasMorePages.value = false
         break
       }
     } catch (e) {
+      console.error('Page load error:', e)
       hasMorePages.value = false
       break
     }
   }
   
-  if (newPages.length === 0 && currentPageIndex.value === 0) {
-    for (let i = 0; i < 3; i++) {
-      ofdPages.value.push(buildOfdImageUrl(ofdPath.value, i))
-    }
-    hasMorePages.value = true
-  } else {
-    ofdPages.value = [...ofdPages.value, ...newPages]
-    currentPageIndex.value += newPages.length
-    if (newPages.length < pagesToLoad) hasMorePages.value = false
+  // If we tried to load pages on initial load but got none
+  if (currentPageIndex.value === 0 && loadedCount === 0) {
+     ofdError.value = '文档内容无法预览'
+     hasMorePages.value = false
   }
 }
 
@@ -347,22 +348,9 @@ const loadMorePages = async () => {
   loadingMorePages.value = false
 }
 
-const buildOfdImageUrl = (path, pageIndex) => {
-  const innerUrl = `http://172.16.220.27:38080/law-search/amazonFile/ofdGenerateLink?filePath=${path}`
-  const onceEncoded = encodeURIComponent(innerUrl)
-  const doubleEncoded = encodeURIComponent(onceEncoded)
-  const timestamp = Date.now()
-  return `/api/ofd/reader/image?file=${doubleEncoded}&_b=3.2.0&_i=${pageIndex}&_=${timestamp}&_v=1&_h=0&_p=120`
-}
-
 const handleImageError = (index) => {
-  console.log('Image error:', index)
-  if (index === 0 && ofdPages.value.length <= 3) {
-    ofdError.value = '文档暂时无法访问'
-  }
-  if (index >= currentPageIndex.value - 1) {
-    hasMorePages.value = false
-  }
+  console.log('Image render error:', index)
+  // This is less likely to happen with Base64, but if data is corrupted
 }
 
 const retryLoadOfd = () => {
