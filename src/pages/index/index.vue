@@ -150,7 +150,7 @@ const goToDetail = (type, item) => {
 }
 
 const goToLawSearch = () => {
-  uni.navigateTo({
+  uni.switchTab({
     url: '/pages/law/law'
   })
 }

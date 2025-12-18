@@ -94,6 +94,11 @@
           <text class="tool-name">自查清单</text>
           <text class="tool-desc">签约前核对</text>
         </view>
+        <view class="grid-card" @click="goToLawSearch">
+          <text class="tool-icon">⚖️</text>
+          <text class="tool-name">法律查询</text>
+          <text class="tool-desc">搜索法规全文</text>
+        </view>
       </view>
     </view>
   </view>
@@ -101,6 +106,12 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+
+const goToLawSearch = () => {
+  uni.switchTab({
+    url: '/pages/law/law'
+  })
+}
 
 const API_KEY = 'sk-pyuyacwmrpbpfihhappjxuqxvevlkoghjuwkjqlyddyluvyc'
 const API_URL = 'https://api.siliconflow.cn/v1/chat/completions'

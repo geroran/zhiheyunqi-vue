@@ -8,7 +8,7 @@
 
     <!-- Header -->
     <view class="header">
-      <view class="back-btn" @click="handleBack">
+      <view class="back-btn" @click="handleBack" v-if="showViewer">
         <text class="back-icon">‹</text>
       </view>
       <view class="header-content">
